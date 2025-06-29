@@ -1,0 +1,1117 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title>Kelas NDVI, NDBI, & LST pada tahun 2018, 2021, & 2024 di Jakarta Selatan</title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="data/BatasAdministrasiJakartaSelatan_1.js"></script>
+        <script src="data/KelasNDVI2024_2.js"></script>
+        <script src="data/KelasNDVI2021_3.js"></script>
+        <script src="data/KelasNDVI2018_4.js"></script>
+        <script src="data/KelasNDBI2024_5.js"></script>
+        <script src="data/KelasNDBI2021_6.js"></script>
+        <script src="data/KelasNDBI2018_7.js"></script>
+        <script>
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+
+            if (e.target.feature.geometry.type === 'LineString' || e.target.feature.geometry.type === 'MultiLineString') {
+              highlightLayer.setStyle({
+                color: '#ffff00',
+              });
+            } else {
+              highlightLayer.setStyle({
+                fillColor: '#ffff00',
+                fillOpacity: 1
+              });
+            }
+            highlightLayer.openPopup();
+        }
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:28, minZoom:1
+        }).fitBounds([[-6.376921546241244,106.70092491880533],[-6.183441843258207,106.96251337495619]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        // remove popup's row if "visible-with-data"
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        // add class to format popup if it contains media
+		function addClassToPopupIfMedia(content, popup) {
+			var tempDiv = document.createElement('div');
+			tempDiv.innerHTML = content;
+			if (tempDiv.querySelector('td img')) {
+				popup._contentNode.classList.add('media');
+					// Delay to force the redraw
+					setTimeout(function() {
+						popup.update();
+					}, 10);
+			} else {
+				popup._contentNode.classList.remove('media');
+			}
+		}
+        var title = new L.Control({'position':'topright'});
+        title.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'info');
+            this.update();
+            return this._div;
+        };
+        title.update = function () {
+            this._div.innerHTML = '<h2>Kelas NDVI, NDBI, & LST pada tahun 2018, 2021, & 2024 di Jakarta Selatan</h2>';
+        };
+        title.addTo(map);
+        var zoomControl = L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_Positron_0');
+        map.getPane('pane_Positron_0').style.zIndex = 400;
+        var layer_Positron_0 = L.tileLayer('https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+            pane: 'pane_Positron_0',
+            opacity: 1.0,
+            attribution: '<a href="https://cartodb.com/basemaps/">Map tiles by CartoDB, under CC BY 3.0. Data by OpenStreetMap, under ODbL.</a>',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 20
+        });
+        layer_Positron_0;
+        map.addLayer(layer_Positron_0);
+        function pop_BatasAdministrasiJakartaSelatan_1(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Kecamatan</th>\
+                        <td>' + (feature.properties['Kecamatan'] !== null ? autolinker.link(String(feature.properties['Kecamatan']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_BatasAdministrasiJakartaSelatan_1_0(feature) {
+            switch(String(feature.properties['NAMOBJ'])) {
+                case 'Cilandak':
+                    return {
+                pane: 'pane_BatasAdministrasiJakartaSelatan_1',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(129,179,222,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Jagakarsa':
+                    return {
+                pane: 'pane_BatasAdministrasiJakartaSelatan_1',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(127,125,230,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Kebayoran Baru':
+                    return {
+                pane: 'pane_BatasAdministrasiJakartaSelatan_1',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(183,207,121,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Kebayoran Lama':
+                    return {
+                pane: 'pane_BatasAdministrasiJakartaSelatan_1',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(169,124,206,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Mampang Prapatan':
+                    return {
+                pane: 'pane_BatasAdministrasiJakartaSelatan_1',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(219,194,120,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Pancoran':
+                    return {
+                pane: 'pane_BatasAdministrasiJakartaSelatan_1',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(205,118,98,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Pasar Minggu':
+                    return {
+                pane: 'pane_BatasAdministrasiJakartaSelatan_1',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(60,222,122,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Pesanggrahan':
+                    return {
+                pane: 'pane_BatasAdministrasiJakartaSelatan_1',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(59,206,30,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Setia Budi':
+                    return {
+                pane: 'pane_BatasAdministrasiJakartaSelatan_1',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(71,219,207,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Tebet':
+                    return {
+                pane: 'pane_BatasAdministrasiJakartaSelatan_1',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(211,36,193,1.0)',
+                interactive: true,
+            }
+                    break;
+                default:
+                    return {
+                pane: 'pane_BatasAdministrasiJakartaSelatan_1',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(207,21,89,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_BatasAdministrasiJakartaSelatan_1');
+        map.getPane('pane_BatasAdministrasiJakartaSelatan_1').style.zIndex = 401;
+        map.getPane('pane_BatasAdministrasiJakartaSelatan_1').style['mix-blend-mode'] = 'normal';
+        var layer_BatasAdministrasiJakartaSelatan_1 = new L.geoJson(json_BatasAdministrasiJakartaSelatan_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_BatasAdministrasiJakartaSelatan_1',
+            layerName: 'layer_BatasAdministrasiJakartaSelatan_1',
+            pane: 'pane_BatasAdministrasiJakartaSelatan_1',
+            onEachFeature: pop_BatasAdministrasiJakartaSelatan_1,
+            style: style_BatasAdministrasiJakartaSelatan_1_0,
+        });
+        bounds_group.addLayer(layer_BatasAdministrasiJakartaSelatan_1);
+        map.addLayer(layer_BatasAdministrasiJakartaSelatan_1);
+        function pop_KelasNDVI2024_2(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Keterangan</th>\
+                        <td class="visible-with-data" id="Keterangan">' + (feature.properties['Keterangan'] !== null ? autolinker.link(String(feature.properties['Keterangan']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Kelas NDVI</th>\
+                        <td>' + (feature.properties['Kelas NDVI'] !== null ? autolinker.link(String(feature.properties['Kelas NDVI']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_KelasNDVI2024_2_0(feature) {
+            switch(String(feature.properties['Keterangan'])) {
+                case 'Kehijauan Tinggi':
+                    return {
+                pane: 'pane_KelasNDVI2024_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(26,150,65,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Kehijauan Sedang':
+                    return {
+                pane: 'pane_KelasNDVI2024_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(166,217,106,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Kehijauan Rendah':
+                    return {
+                pane: 'pane_KelasNDVI2024_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,255,192,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Kehijauan Sangat Rendah':
+                    return {
+                pane: 'pane_KelasNDVI2024_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,174,97,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Lahan Tidak Bervegetasi':
+                    return {
+                pane: 'pane_KelasNDVI2024_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(215,25,28,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_KelasNDVI2024_2');
+        map.getPane('pane_KelasNDVI2024_2').style.zIndex = 402;
+        map.getPane('pane_KelasNDVI2024_2').style['mix-blend-mode'] = 'normal';
+        var layer_KelasNDVI2024_2 = new L.geoJson(json_KelasNDVI2024_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_KelasNDVI2024_2',
+            layerName: 'layer_KelasNDVI2024_2',
+            pane: 'pane_KelasNDVI2024_2',
+            onEachFeature: pop_KelasNDVI2024_2,
+            style: style_KelasNDVI2024_2_0,
+        });
+        bounds_group.addLayer(layer_KelasNDVI2024_2);
+        map.addLayer(layer_KelasNDVI2024_2);
+        function pop_KelasNDVI2021_3(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Keterangan</th>\
+                        <td class="visible-with-data" id="Keterangan">' + (feature.properties['Keterangan'] !== null ? autolinker.link(String(feature.properties['Keterangan']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Kelas NDVI</th>\
+                        <td>' + (feature.properties['Kelas NDVI'] !== null ? autolinker.link(String(feature.properties['Kelas NDVI']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_KelasNDVI2021_3_0(feature) {
+            switch(String(feature.properties['Keterangan'])) {
+                case 'Kehijauan Tinggi':
+                    return {
+                pane: 'pane_KelasNDVI2021_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(26,150,65,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Kehijauan Sedang':
+                    return {
+                pane: 'pane_KelasNDVI2021_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(166,217,106,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Kehijauan Rendah':
+                    return {
+                pane: 'pane_KelasNDVI2021_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,255,192,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Kehijauan Sangat Rendah':
+                    return {
+                pane: 'pane_KelasNDVI2021_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,174,97,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Lahan Tidak Bervegetasi':
+                    return {
+                pane: 'pane_KelasNDVI2021_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(215,25,28,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_KelasNDVI2021_3');
+        map.getPane('pane_KelasNDVI2021_3').style.zIndex = 403;
+        map.getPane('pane_KelasNDVI2021_3').style['mix-blend-mode'] = 'normal';
+        var layer_KelasNDVI2021_3 = new L.geoJson(json_KelasNDVI2021_3, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_KelasNDVI2021_3',
+            layerName: 'layer_KelasNDVI2021_3',
+            pane: 'pane_KelasNDVI2021_3',
+            onEachFeature: pop_KelasNDVI2021_3,
+            style: style_KelasNDVI2021_3_0,
+        });
+        bounds_group.addLayer(layer_KelasNDVI2021_3);
+        map.addLayer(layer_KelasNDVI2021_3);
+        function pop_KelasNDVI2018_4(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Keterangan</th>\
+                        <td class="visible-with-data" id="Keterangan">' + (feature.properties['Keterangan'] !== null ? autolinker.link(String(feature.properties['Keterangan']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Kelas NDVI</th>\
+                        <td>' + (feature.properties['Kelas NDVI'] !== null ? autolinker.link(String(feature.properties['Kelas NDVI']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_KelasNDVI2018_4_0(feature) {
+            switch(String(feature.properties['Keterangan'])) {
+                case 'Kehijauan Tinggi':
+                    return {
+                pane: 'pane_KelasNDVI2018_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(26,150,65,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Kehijauan Sedang':
+                    return {
+                pane: 'pane_KelasNDVI2018_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(166,217,106,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Kehijauan Rendah':
+                    return {
+                pane: 'pane_KelasNDVI2018_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,255,192,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Kehijauan Sangat Rendah':
+                    return {
+                pane: 'pane_KelasNDVI2018_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,174,97,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Lahan Tidak Bervegetasi':
+                    return {
+                pane: 'pane_KelasNDVI2018_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(215,25,28,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_KelasNDVI2018_4');
+        map.getPane('pane_KelasNDVI2018_4').style.zIndex = 404;
+        map.getPane('pane_KelasNDVI2018_4').style['mix-blend-mode'] = 'normal';
+        var layer_KelasNDVI2018_4 = new L.geoJson(json_KelasNDVI2018_4, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_KelasNDVI2018_4',
+            layerName: 'layer_KelasNDVI2018_4',
+            pane: 'pane_KelasNDVI2018_4',
+            onEachFeature: pop_KelasNDVI2018_4,
+            style: style_KelasNDVI2018_4_0,
+        });
+        bounds_group.addLayer(layer_KelasNDVI2018_4);
+        map.addLayer(layer_KelasNDVI2018_4);
+        function pop_KelasNDBI2024_5(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Keterangan</th>\
+                        <td class="visible-with-data" id="Keterangan">' + (feature.properties['Keterangan'] !== null ? autolinker.link(String(feature.properties['Keterangan']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Kelas NDBI</th>\
+                        <td>' + (feature.properties['Kelas NDBI'] !== null ? autolinker.link(String(feature.properties['Kelas NDBI']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_KelasNDBI2024_5_0(feature) {
+            switch(String(feature.properties['Keterangan'])) {
+                case 'Non-Permukiman':
+                    return {
+                pane: 'pane_KelasNDBI2024_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(250,250,250,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Permukiman Jarang':
+                    return {
+                pane: 'pane_KelasNDBI2024_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(168,168,168,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Permukiman Rapat':
+                    return {
+                pane: 'pane_KelasNDBI2024_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(87,87,87,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Permukiman Sangat Rapat':
+                    return {
+                pane: 'pane_KelasNDBI2024_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(5,5,5,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_KelasNDBI2024_5');
+        map.getPane('pane_KelasNDBI2024_5').style.zIndex = 405;
+        map.getPane('pane_KelasNDBI2024_5').style['mix-blend-mode'] = 'normal';
+        var layer_KelasNDBI2024_5 = new L.geoJson(json_KelasNDBI2024_5, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_KelasNDBI2024_5',
+            layerName: 'layer_KelasNDBI2024_5',
+            pane: 'pane_KelasNDBI2024_5',
+            onEachFeature: pop_KelasNDBI2024_5,
+            style: style_KelasNDBI2024_5_0,
+        });
+        bounds_group.addLayer(layer_KelasNDBI2024_5);
+        map.addLayer(layer_KelasNDBI2024_5);
+        function pop_KelasNDBI2021_6(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Keterangan</th>\
+                        <td class="visible-with-data" id="Keterangan">' + (feature.properties['Keterangan'] !== null ? autolinker.link(String(feature.properties['Keterangan']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Kelas NDBI</th>\
+                        <td>' + (feature.properties['Kelas NDBI'] !== null ? autolinker.link(String(feature.properties['Kelas NDBI']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_KelasNDBI2021_6_0(feature) {
+            switch(String(feature.properties['Keterangan'])) {
+                case 'Non Permukiman':
+                    return {
+                pane: 'pane_KelasNDBI2021_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(250,250,250,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Permukiman Jarang':
+                    return {
+                pane: 'pane_KelasNDBI2021_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(168,168,168,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Permukiman Rapat':
+                    return {
+                pane: 'pane_KelasNDBI2021_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(87,87,87,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Permukiman Sangat Rapat':
+                    return {
+                pane: 'pane_KelasNDBI2021_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(5,5,5,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_KelasNDBI2021_6');
+        map.getPane('pane_KelasNDBI2021_6').style.zIndex = 406;
+        map.getPane('pane_KelasNDBI2021_6').style['mix-blend-mode'] = 'normal';
+        var layer_KelasNDBI2021_6 = new L.geoJson(json_KelasNDBI2021_6, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_KelasNDBI2021_6',
+            layerName: 'layer_KelasNDBI2021_6',
+            pane: 'pane_KelasNDBI2021_6',
+            onEachFeature: pop_KelasNDBI2021_6,
+            style: style_KelasNDBI2021_6_0,
+        });
+        bounds_group.addLayer(layer_KelasNDBI2021_6);
+        map.addLayer(layer_KelasNDBI2021_6);
+        function pop_KelasNDBI2018_7(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Keterangan</th>\
+                        <td class="visible-with-data" id="Keterangan">' + (feature.properties['Keterangan'] !== null ? autolinker.link(String(feature.properties['Keterangan']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Kelas NDBI</th>\
+                        <td>' + (feature.properties['Kelas NDBI'] !== null ? autolinker.link(String(feature.properties['Kelas NDBI']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_KelasNDBI2018_7_0(feature) {
+            switch(String(feature.properties['Keterangan'])) {
+                case 'Non Permukiman':
+                    return {
+                pane: 'pane_KelasNDBI2018_7',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(250,250,250,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Permukiman Jarang':
+                    return {
+                pane: 'pane_KelasNDBI2018_7',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(168,168,168,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Permukiman Rapat':
+                    return {
+                pane: 'pane_KelasNDBI2018_7',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(87,87,87,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Permukiman Sangat Rapat':
+                    return {
+                pane: 'pane_KelasNDBI2018_7',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(5,5,5,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_KelasNDBI2018_7');
+        map.getPane('pane_KelasNDBI2018_7').style.zIndex = 407;
+        map.getPane('pane_KelasNDBI2018_7').style['mix-blend-mode'] = 'normal';
+        var layer_KelasNDBI2018_7 = new L.geoJson(json_KelasNDBI2018_7, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_KelasNDBI2018_7',
+            layerName: 'layer_KelasNDBI2018_7',
+            pane: 'pane_KelasNDBI2018_7',
+            onEachFeature: pop_KelasNDBI2018_7,
+            style: style_KelasNDBI2018_7_0,
+        });
+        bounds_group.addLayer(layer_KelasNDBI2018_7);
+        map.addLayer(layer_KelasNDBI2018_7);
+        map.createPane('pane_LST2024_8');
+        map.getPane('pane_LST2024_8').style.zIndex = 408;
+        var img_LST2024_8 = 'data/LST2024_8.png';
+        var img_bounds_LST2024_8 = [[-6.365274706611179,106.73361520908296],[-6.202064500322325,106.86754940000102]];
+        var layer_LST2024_8 = new L.imageOverlay(img_LST2024_8,
+                                              img_bounds_LST2024_8,
+                                              {pane: 'pane_LST2024_8'});
+        bounds_group.addLayer(layer_LST2024_8);
+        map.addLayer(layer_LST2024_8);
+        map.createPane('pane_LST2021_9');
+        map.getPane('pane_LST2021_9').style.zIndex = 409;
+        var img_LST2021_9 = 'data/LST2021_9.png';
+        var img_bounds_LST2021_9 = [[-6.365546877893996,106.73334415468719],[-6.202064500322325,106.86755038004112]];
+        var layer_LST2021_9 = new L.imageOverlay(img_LST2021_9,
+                                              img_bounds_LST2021_9,
+                                              {pane: 'pane_LST2021_9'});
+        bounds_group.addLayer(layer_LST2021_9);
+        map.addLayer(layer_LST2021_9);
+        map.createPane('pane_LST2018_10');
+        map.getPane('pane_LST2018_10').style.zIndex = 410;
+        var img_LST2018_10 = 'data/LST2018_10.png';
+        var img_bounds_LST2018_10 = [[-6.365546877893996,106.73334415468719],[-6.202064500322325,106.86755038004112]];
+        var layer_LST2018_10 = new L.imageOverlay(img_LST2018_10,
+                                              img_bounds_LST2018_10,
+                                              {pane: 'pane_LST2018_10'});
+        bounds_group.addLayer(layer_LST2018_10);
+        map.addLayer(layer_LST2018_10);
+        var overlaysTree = [
+            {label: "LST (2018)", layer: layer_LST2018_10},
+            {label: "LST (2021)", layer: layer_LST2021_9},
+            {label: "LST (2024)", layer: layer_LST2024_8},
+            {label: 'Kelas NDBI (2018)<br /><table><tr><td style="text-align: center;"><img src="legend/KelasNDBI2018_7_NonPermukiman0.png" /></td><td>Non Permukiman</td></tr><tr><td style="text-align: center;"><img src="legend/KelasNDBI2018_7_PermukimanJarang1.png" /></td><td>Permukiman Jarang</td></tr><tr><td style="text-align: center;"><img src="legend/KelasNDBI2018_7_PermukimanRapat2.png" /></td><td>Permukiman Rapat</td></tr><tr><td style="text-align: center;"><img src="legend/KelasNDBI2018_7_PermukimanSangatRapat3.png" /></td><td>Permukiman Sangat Rapat</td></tr></table>', layer: layer_KelasNDBI2018_7},
+            {label: 'Kelas NDBI (2021)<br /><table><tr><td style="text-align: center;"><img src="legend/KelasNDBI2021_6_NonPermukiman0.png" /></td><td>Non Permukiman</td></tr><tr><td style="text-align: center;"><img src="legend/KelasNDBI2021_6_PermukimanJarang1.png" /></td><td>Permukiman Jarang</td></tr><tr><td style="text-align: center;"><img src="legend/KelasNDBI2021_6_PermukimanRapat2.png" /></td><td>Permukiman Rapat</td></tr><tr><td style="text-align: center;"><img src="legend/KelasNDBI2021_6_PermukimanSangatRapat3.png" /></td><td>Permukiman Sangat Rapat</td></tr></table>', layer: layer_KelasNDBI2021_6},
+            {label: 'Kelas NDBI (2024)<br /><table><tr><td style="text-align: center;"><img src="legend/KelasNDBI2024_5_NonPermukiman0.png" /></td><td>Non-Permukiman</td></tr><tr><td style="text-align: center;"><img src="legend/KelasNDBI2024_5_PermukimanJarang1.png" /></td><td>Permukiman Jarang</td></tr><tr><td style="text-align: center;"><img src="legend/KelasNDBI2024_5_PermukimanRapat2.png" /></td><td>Permukiman Rapat</td></tr><tr><td style="text-align: center;"><img src="legend/KelasNDBI2024_5_PermukimanSangatRapat3.png" /></td><td>Permukiman Sangat Rapat</td></tr></table>', layer: layer_KelasNDBI2024_5},
+            {label: 'Kelas NDVI (2018)<br /><table><tr><td style="text-align: center;"><img src="legend/KelasNDVI2018_4_KehijauanTinggi0.png" /></td><td>Kehijauan Tinggi</td></tr><tr><td style="text-align: center;"><img src="legend/KelasNDVI2018_4_KehijauanSedang1.png" /></td><td>Kehijauan Sedang</td></tr><tr><td style="text-align: center;"><img src="legend/KelasNDVI2018_4_KehijauanRendah2.png" /></td><td>Kehijauan Rendah</td></tr><tr><td style="text-align: center;"><img src="legend/KelasNDVI2018_4_KehijauanSangatRendah3.png" /></td><td>Kehijauan Sangat Rendah</td></tr><tr><td style="text-align: center;"><img src="legend/KelasNDVI2018_4_LahanTidakBervegetasi4.png" /></td><td>Lahan Tidak Bervegetasi</td></tr></table>', layer: layer_KelasNDVI2018_4},
+            {label: 'Kelas NDVI (2021)<br /><table><tr><td style="text-align: center;"><img src="legend/KelasNDVI2021_3_KehijauanTinggi0.png" /></td><td>Kehijauan Tinggi</td></tr><tr><td style="text-align: center;"><img src="legend/KelasNDVI2021_3_KehijauanSedang1.png" /></td><td>Kehijauan Sedang</td></tr><tr><td style="text-align: center;"><img src="legend/KelasNDVI2021_3_KehijauanRendah2.png" /></td><td>Kehijauan Rendah</td></tr><tr><td style="text-align: center;"><img src="legend/KelasNDVI2021_3_KehijauanSangatRendah3.png" /></td><td>Kehijauan Sangat Rendah</td></tr><tr><td style="text-align: center;"><img src="legend/KelasNDVI2021_3_LahanTidakBervegetasi4.png" /></td><td>Lahan Tidak Bervegetasi</td></tr></table>', layer: layer_KelasNDVI2021_3},
+            {label: 'Kelas NDVI (2024)<br /><table><tr><td style="text-align: center;"><img src="legend/KelasNDVI2024_2_KehijauanTinggi0.png" /></td><td>Kehijauan Tinggi</td></tr><tr><td style="text-align: center;"><img src="legend/KelasNDVI2024_2_KehijauanSedang1.png" /></td><td>Kehijauan Sedang</td></tr><tr><td style="text-align: center;"><img src="legend/KelasNDVI2024_2_KehijauanRendah2.png" /></td><td>Kehijauan Rendah</td></tr><tr><td style="text-align: center;"><img src="legend/KelasNDVI2024_2_KehijauanSangatRendah3.png" /></td><td>Kehijauan Sangat Rendah</td></tr><tr><td style="text-align: center;"><img src="legend/KelasNDVI2024_2_LahanTidakBervegetasi4.png" /></td><td>Lahan Tidak Bervegetasi</td></tr></table>', layer: layer_KelasNDVI2024_2},
+            {label: 'Batas Administrasi Jakarta Selatan<br /><table><tr><td style="text-align: center;"><img src="legend/BatasAdministrasiJakartaSelatan_1_Cilandak0.png" /></td><td>Cilandak</td></tr><tr><td style="text-align: center;"><img src="legend/BatasAdministrasiJakartaSelatan_1_Jagakarsa1.png" /></td><td>Jagakarsa</td></tr><tr><td style="text-align: center;"><img src="legend/BatasAdministrasiJakartaSelatan_1_KebayoranBaru2.png" /></td><td>Kebayoran Baru</td></tr><tr><td style="text-align: center;"><img src="legend/BatasAdministrasiJakartaSelatan_1_KebayoranLama3.png" /></td><td>Kebayoran Lama</td></tr><tr><td style="text-align: center;"><img src="legend/BatasAdministrasiJakartaSelatan_1_MampangPrapatan4.png" /></td><td>Mampang Prapatan</td></tr><tr><td style="text-align: center;"><img src="legend/BatasAdministrasiJakartaSelatan_1_Pancoran5.png" /></td><td>Pancoran</td></tr><tr><td style="text-align: center;"><img src="legend/BatasAdministrasiJakartaSelatan_1_PasarMinggu6.png" /></td><td>Pasar Minggu</td></tr><tr><td style="text-align: center;"><img src="legend/BatasAdministrasiJakartaSelatan_1_Pesanggrahan7.png" /></td><td>Pesanggrahan</td></tr><tr><td style="text-align: center;"><img src="legend/BatasAdministrasiJakartaSelatan_1_SetiaBudi8.png" /></td><td>Setia Budi</td></tr><tr><td style="text-align: center;"><img src="legend/BatasAdministrasiJakartaSelatan_1_Tebet9.png" /></td><td>Tebet</td></tr><tr><td style="text-align: center;"><img src="legend/BatasAdministrasiJakartaSelatan_1_10.png" /></td><td></td></tr></table>', layer: layer_BatasAdministrasiJakartaSelatan_1},
+            {label: "Positron", layer: layer_Positron_0},]
+        var lay = L.control.layers.tree(null, overlaysTree,{
+            //namedToggle: true,
+            //selectorBack: false,
+            //closedSymbol: '&#8862; &#x1f5c0;',
+            //openedSymbol: '&#8863; &#x1f5c1;',
+            //collapseAll: 'Collapse all',
+            //expandAll: 'Expand all',
+            collapsed: true,
+        });
+        lay.addTo(map);
+        setBounds();
+        L.ImageOverlay.include({
+            getBounds: function () {
+                return this._bounds;
+            }
+        });
+        </script>
+    </body>
+</html>
